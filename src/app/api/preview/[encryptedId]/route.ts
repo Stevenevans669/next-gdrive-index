@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { IS_DEV } from "~/constant";
 
-import { encryptionService, gdriveNoCache } from "~/lib/utils.server";
+import { encryptionService, getGDriveNoCacheClient } from "~/lib/utils.server";
 
 import { GetFile } from "~/actions/files";
 
@@ -61,6 +61,7 @@ export async function GET(
       });
     }
 
+    const gdriveNoCache = getGDriveNoCacheClient();
     const ranges = request.headers.get("Range") ?? "bytes=0-";
     const chunkSize = 5 * 1024 * 1024; // Load 5MB at a time
     let rangeStart = 0;

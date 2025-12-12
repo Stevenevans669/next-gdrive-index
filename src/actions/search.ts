@@ -3,7 +3,7 @@
 import { type z } from "zod";
 import { type ActionResponseSchema } from "~/types";
 
-import { encryptionService, gdrive } from "~/lib/utils.server";
+import { encryptionService, getGDriveClient } from "~/lib/utils.server";
 
 import { Schema_File } from "~/types/schema";
 
@@ -12,6 +12,7 @@ import config from "config";
 import { GetFilePaths } from "./paths";
 
 export async function SearchFiles(query: string): Promise<ActionResponseSchema<z.infer<typeof Schema_File>[]>> {
+  const gdrive = getGDriveClient();
   const isSharedDrive = !!(config.apiConfig.isTeamDrive && config.apiConfig.sharedDrive);
   const decryptedSharedDrive = isSharedDrive
     ? await encryptionService.decrypt(config.apiConfig.sharedDrive!)
@@ -84,6 +85,7 @@ export async function SearchFiles(query: string): Promise<ActionResponseSchema<z
 }
 
 export async function GetSearchResultPath(id: string): Promise<ActionResponseSchema<string>> {
+  const gdrive = getGDriveClient();
   const isSharedDrive = !!(config.apiConfig.isTeamDrive && config.apiConfig.sharedDrive);
   const decryptedId = await encryptionService.decrypt(id ?? config.apiConfig.rootFolder);
 
