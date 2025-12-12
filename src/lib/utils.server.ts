@@ -85,7 +85,12 @@ class GoogleDriveService {
   public gdriveNoCache: drive_v3.Drive;
 
   constructor() {
-    const decodedB64 = base64Decode<string>(process.env.GD_SERVICE_B64!);
+    const encodedServiceAccount = process.env.GD_SERVICE_B64;
+    if (!encodedServiceAccount) {
+      throw new Error("GD_SERVICE_B64 is required in the environment variables.");
+    }
+
+    const decodedB64 = base64Decode<string>(encodedServiceAccount);
     if (!decodedB64) throw new Error("Failed to decode GD_SERVICE_B64");
     const parsedAuth = Schema_ServiceAccount.safeParse(JSON.parse(decodedB64));
     if (!parsedAuth.success) throw new Error("Failed to parse service account");
@@ -117,5 +122,15 @@ class GoogleDriveService {
   }
 }
 
-export const { gdrive, gdriveNoCache } = new GoogleDriveService();
+let googleDriveService: GoogleDriveService | null = null;
+
+export const getGoogleDriveService = () => {
+  if (!googleDriveService) {
+    googleDriveService = new GoogleDriveService();
+  }
+
+  return googleDriveService;
+};
+export const getGDriveClient = () => getGoogleDriveService().gdrive;
+export const getGDriveNoCacheClient = () => getGoogleDriveService().gdriveNoCache;
 export const encryptionService = new EncryptionService();

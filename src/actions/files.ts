@@ -3,7 +3,7 @@
 import { type z } from "zod";
 import { type ActionResponseSchema } from "~/types";
 
-import { encryptionService, gdrive } from "~/lib/utils.server";
+import { encryptionService, getGDriveClient } from "~/lib/utils.server";
 
 import { Schema_File, Schema_File_Shortcut } from "~/types/schema";
 
@@ -23,6 +23,7 @@ export async function ListFiles({ id, pageToken }: { id?: string; pageToken?: st
     nextPageToken?: string | null;
   }>
 > {
+  const gdrive = getGDriveClient();
   const isSharedDrive = !!(config.apiConfig.isTeamDrive && config.apiConfig.sharedDrive);
   const decryptedId = await encryptionService.decrypt(id ?? config.apiConfig.rootFolder);
   const decryptedSharedDrive = isSharedDrive
@@ -111,6 +112,7 @@ export async function ListFiles({ id, pageToken }: { id?: string; pageToken?: st
 export async function GetFile(id: string): Promise<ActionResponseSchema<z.infer<typeof Schema_File> | null>> {
   const decryptedId = await encryptionService.decrypt(id ?? config.apiConfig.rootFolder);
 
+  const gdrive = getGDriveClient();
   const { data } = await gdrive.files.get({
     fileId: decryptedId,
     fields: config.apiConfig.defaultField,
@@ -174,6 +176,7 @@ export async function GetReadme(id: string | null = null): Promise<
     content: string;
   } | null>
 > {
+  const gdrive = getGDriveClient();
   const isSharedDrive = !!(config.apiConfig.isTeamDrive && config.apiConfig.sharedDrive);
   const decryptedId = await encryptionService.decrypt(id ?? config.apiConfig.rootFolder);
   const decryptedSharedDrive = isSharedDrive
@@ -302,6 +305,7 @@ export async function GetReadme(id: string | null = null): Promise<
  * @param id - Folder ID to fetch, default is root folder
  */
 export async function GetBanner(id: string | null = null): Promise<ActionResponseSchema<string | null>> {
+  const gdrive = getGDriveClient();
   const isSharedDrive = !!(config.apiConfig.isTeamDrive && config.apiConfig.sharedDrive);
   const decryptedId = await encryptionService.decrypt(id ?? config.apiConfig.rootFolder);
   const decryptedSharedDrive = isSharedDrive
@@ -349,6 +353,7 @@ export async function GetBanner(id: string | null = null): Promise<ActionRespons
 export async function GetContent(id: string): Promise<ActionResponseSchema<string>> {
   const decryptedId = await encryptionService.decrypt(id);
 
+  const gdrive = getGDriveClient();
   const { data, status, statusText } = await gdrive.files.get(
     {
       fileId: decryptedId,
@@ -378,6 +383,7 @@ export async function GetContent(id: string): Promise<ActionResponseSchema<strin
  * @param paths - Paths to check
  */
 export async function GetSiblingsMedia(paths: string[]): Promise<ActionResponseSchema<z.infer<typeof Schema_File>[]>> {
+  const gdrive = getGDriveClient();
   const pathIds = await ValidatePaths(paths);
   if (!pathIds.success)
     return {

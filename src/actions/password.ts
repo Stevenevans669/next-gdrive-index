@@ -6,7 +6,7 @@ import { COOKIES_NAME, COOKIES_OPTIONS } from "~/constant";
 import { type ActionResponseSchema } from "~/types";
 
 import { toUrlPath } from "~/lib/utils";
-import { encryptionService, gdriveNoCache } from "~/lib/utils.server";
+import { encryptionService, getGDriveNoCacheClient } from "~/lib/utils.server";
 
 import config from "config";
 
@@ -126,6 +126,8 @@ export async function CheckPagePassword(
   const decryptedSharedDrive = isSharedDrive
     ? await encryptionService.decrypt(config.apiConfig.sharedDrive!)
     : undefined;
+
+  const gdriveNoCache = getGDriveNoCacheClient();
 
   const pathsArray = paths;
 
